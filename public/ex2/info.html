@@ -1,71 +1,101 @@
 <!DOCTYPE html>
-<html>
-    <head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Viewer</title>
+  <!-- Bootstrap -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+    crossorigin="anonymous"
+  >
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div class="bg-light text-center p-4 mb-4">
+    <h2>Choose an option:</h2>
+    <div class="d-inline-block me-3">
+      <label for="limit" class="form-label">Limit:</label>
+      <input 
+        id="limit" 
+        type="number" 
+        min="1" 
+        max="5" 
+        value="1" 
+        class="form-control d-inline-block" 
+        style="width:80px;"
+      >
+    </div>
+    <div class="d-inline-block">
+      <label for="type" class="form-label">Type:</label>
+      <select id="type" class="form-select d-inline-block" style="width:150px;">
+        <option value="customers">Customers</option>
+        <option value="products">Products</option>
+        <option value="suppliers">Suppliers</option>
+      </select>
+    </div>
+  </div>
 
-        <!-- Bootstrap -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        
-         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    </head>
-    <body>
-        <div class="bg-light text-center p-5 mb-4">
-            <h2>Choose an option:</h2>
-            <label for="limit">Limit:</label>
-            <input onchange="getData()" id="limit" type="number" min=1 max=5 value=1>
-            <select onchange="getData()" id="type">
-                <option value="customers">Customers</option>
-                <option value="products">Products</option>
-                <option value="suppliers">Suppliers</option>
-            </select>
-            
-        </div>
-        <div id="result">
+  <div id="result" class="container"></div>
 
-        </div>
-        <script>
-  function buildTable(records, type) {
-    if (!records || records.length === 0) {
-      return `<h2>${type}</h2><p>No data</p>`;
+  <script>
+    // Build an HTML table string from records
+    function buildTable(records, type) {
+      if (!records || records.length === 0) {
+        return `<h2>${type}</h2><p>No data</p>`;
+      }
+
+      const headers = Object.keys(records[0]);
+      let html = `
+        <h2>${type}</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const row of records) {
+        html += `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`;
+      }
+
+      html += `
+          </tbody>
+        </table>
+      `;
+      return html;
     }
 
-    const headers = Object.keys(records[0]);
+    // Fetch data from backend
+    async function getData() {
+      const limit = document.getElementById('limit').value;
+      const type = document.getElementById('type').value;
+      const resultDiv = document.getElementById('result');
 
-    let s = `
-      <h2>${type}</h2>
-      <table class="table">
-        <thead>
-          <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-        </thead>
-        <tbody>
-    `;
-
-    for (const row of records) {
-      s += `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`;
+      try {
+        const res = await axios.get('/data', { params: { type, limit } });
+        const { records } = res.data;
+        resultDiv.innerHTML = buildTable(records, type);
+      } catch (err) {
+        console.error(err);
+        resultDiv.innerHTML = `<h2>${type}</h2><p class="text-danger">Failed to load data</p>`;
+      }
     }
 
-    s += `
-        </tbody>
-      </table>
-    `;
-    return s;
-  }
+    // Event listeners
+    document.getElementById('limit').addEventListener('input', getData);
+    document.getElementById('type').addEventListener('change', getData);
 
-  async function getData() {
-    const limit = document.getElementById('limit').value;
-    const type  = document.getElementById('type').value;
-    try {
-      const res = await axios.get('/data', { params: { type, limit } });
-      const { records } = res.data;
-      document.getElementById('result').innerHTML = buildTable(records, type);
-    } catch (err) {
-      console.error(err);
-      document.getElementById('result').innerHTML = `<h2>${type}</h2><p class="text-danger">Failed to load data</p>`;
-    }
-  }
+    // Load table on page load
+    window.addEventListener('DOMContentLoaded', getData);
+  </script>
 
-  window.addEventListener('DOMContentLoaded', getData);
-</script>
-
-
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+    crossorigin="anonymous">
+  </script>
 </body>
 </html>
