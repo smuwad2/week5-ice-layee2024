@@ -6,7 +6,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
    
         <!-- Add Axios Library -->
-
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     </head>
     <body>
         <div class="container-fluid">
@@ -20,8 +20,23 @@
         </div>
 
         <script>
-            // add event handler code here
+            let name = document.getElementById('nameInput');
+            let suggestions = document.getElementById('suggestions');
+            
+            async function showHint() {
+                const q = name.value.trim();
+                
+                await axios.get('http://localhost:3001/suggest', { params: { query: q } })
+                .then(({ data }) => { 
+                    suggestions.innerText = data; 
+                })
+                .catch(err => { 
+                    console.error(err); 
+                    suggestions.innerText = ''; 
+                });
+            }
 
+            name.addEventListener('keyup', showHint);
         </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -29,3 +44,4 @@
       
     </body>
 </html>
+
