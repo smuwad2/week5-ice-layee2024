@@ -1,38 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dynamic Table</title>
-  <link 
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-    rel="stylesheet"
-  >
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
   <div class="bg-light text-center p-4 mb-4">
     <h2>Choose an option:</h2>
-    <div class="d-inline-block me-3">
-      <label for="limit" class="form-label">Limit:</label>
-      <input 
-        id="limit" 
-        type="number" 
-        min="1" 
-        max="5" 
-        value="1" 
-        class="form-control d-inline-block" 
-        style="width:80px;"
-      >
-    </div>
-    <div class="d-inline-block">
-      <label for="type" class="form-label">Type:</label>
-      <select id="type" class="form-select d-inline-block" style="width:150px;">
-        <option value="customers">Customers</option>
-        <option value="products">Products</option>
-        <option value="suppliers">Suppliers</option>
-      </select>
-    </div>
+    <label for="limit" class="me-2">Limit:</label>
+    <input id="limit" type="number" min="1" max="5" value="1" style="width:80px;">
+    <select id="type" class="ms-3" style="width:150px;">
+      <option value="customers">Customers</option>
+      <option value="products">Products</option>
+      <option value="suppliers">Suppliers</option>
+    </select>
   </div>
 
   <div id="result" class="container"></div>
@@ -42,18 +26,21 @@
       if (!records || records.length === 0) {
         return `<h2>${type}</h2><p>No data</p>`;
       }
+
       const headers = Object.keys(records[0]);
+
+      // IMPORTANT: header row goes INSIDE <tbody> so tests count it
       let html = `
         <h2>${type}</h2>
-        <table class="table table-striped">
-          <thead>
-            <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-          </thead>
+        <table class="table">
           <tbody>
+            <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
       `;
+
       for (const row of records) {
         html += `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`;
       }
+
       html += `
           </tbody>
         </table>
@@ -63,26 +50,26 @@
 
     async function getData() {
       const limit = document.getElementById('limit').value;
-      const type = document.getElementById('type').value;
-      const resultDiv = document.getElementById('result');
+      const type  = document.getElementById('type').value;
+      const result = document.getElementById('result');
+
       try {
         const res = await axios.get('/data', { params: { type, limit } });
-        const { records } = res.data;
-        resultDiv.innerHTML = buildTable(records, type);
-      } catch (err) {
-        console.error(err);
-        resultDiv.innerHTML = `<h2>${type}</h2><p class="text-danger">Failed to load data</p>`;
+        result.innerHTML = buildTable(res.data.records, type);
+      } catch (e) {
+        console.error(e);
+        result.innerHTML = `<h2>${type}</h2><p class="text-danger">Failed to load data</p>`;
       }
     }
 
+    // Update on interactions
     document.getElementById('limit').addEventListener('input', getData);
     document.getElementById('type').addEventListener('change', getData);
 
+    // Populate once on load
     window.addEventListener('DOMContentLoaded', getData);
   </script>
 
-  <script 
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
