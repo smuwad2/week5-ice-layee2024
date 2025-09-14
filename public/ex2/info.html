@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Viewer</title>
-  <!-- Bootstrap -->
+  <title>Dynamic Table</title>
   <link 
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-    rel="stylesheet" 
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-    crossorigin="anonymous"
+    rel="stylesheet"
   >
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
@@ -41,12 +38,10 @@
   <div id="result" class="container"></div>
 
   <script>
-    // Build an HTML table string from records
     function buildTable(records, type) {
       if (!records || records.length === 0) {
         return `<h2>${type}</h2><p>No data</p>`;
       }
-
       const headers = Object.keys(records[0]);
       let html = `
         <h2>${type}</h2>
@@ -56,11 +51,9 @@
           </thead>
           <tbody>
       `;
-
       for (const row of records) {
         html += `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`;
       }
-
       html += `
           </tbody>
         </table>
@@ -68,12 +61,10 @@
       return html;
     }
 
-    // Fetch data from backend
     async function getData() {
       const limit = document.getElementById('limit').value;
       const type = document.getElementById('type').value;
       const resultDiv = document.getElementById('result');
-
       try {
         const res = await axios.get('/data', { params: { type, limit } });
         const { records } = res.data;
@@ -84,18 +75,14 @@
       }
     }
 
-    // Event listeners
     document.getElementById('limit').addEventListener('input', getData);
     document.getElementById('type').addEventListener('change', getData);
 
-    // Load table on page load
     window.addEventListener('DOMContentLoaded', getData);
   </script>
 
   <script 
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-    crossorigin="anonymous">
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
   </script>
 </body>
 </html>
